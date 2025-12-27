@@ -1,6 +1,12 @@
 main goal:
 	source engine recreation
 
+yesterdays goal:
+	setup camera (done)
+
+todays goal (28th december):
+	create class for camera complete with accessors and proper clean code
+
 sub goals:
 	initialize window 1
 	render triangle 1

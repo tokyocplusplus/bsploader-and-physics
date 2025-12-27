@@ -15,10 +15,9 @@
 
 #include "s.h"
 #include "Geometry.h"
+#include "CameraHandler.h"
 
 #include <iostream>
-
-glm::vec3 cameraPos = glm::vec3(0, 0, 3); // z is backwards, -z is forwards
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -26,12 +25,27 @@ void processInput(GLFWwindow* window);
 // this may look almost identical to the learnopengl.com code.. which it kinda is
 // but it'll change VERY soon
 
+glm::vec3 cPos = glm::vec3(0, 0, 3);
+glm::vec3 cTar = glm::vec3(0, 0, 0);
+glm::vec3 cDir = glm::normalize(cPos - cTar);
+glm::vec3 up = glm::vec3(0, 1, 0);
+glm::vec3 cFro = glm::vec3(0, 0, -1);
+glm::vec3 cRig = glm::normalize(glm::cross(up, cDir)); // camera right
+glm::vec3 cUp = glm::cross(cDir, cRig);
+float yaw;
+float pitch;
+bool firstMouse = true;
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+float lastX = 1280;
+float lastY = 720;
 int main()
 {
     // damnThatsCrazyIni: initialize and configure
     // ---------------------------------------------------
     DamnThatsCrazyConfig cfg;
     cfg.LoadGameConfig("window.cfg");
+
 
     // glfw: initialize and configure
     // ------------------------------
@@ -55,6 +69,8 @@ int main()
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPosCallback(window, mouse_callback);
 
     // glad: load all OpenGL function pointers
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -169,7 +185,7 @@ int main()
     ourShader.setInt("texture2", 1);
     glEnable(GL_DEPTH_TEST);
 
-
+    glfwSwapInterval(1); // runs at 60 the whole time
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -189,23 +205,24 @@ int main()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
 
-
+        const float radius = 10.f;
+        float camX = sin(glfwGetTime()) * radius;
+        float camZ = cos(glfwGetTime()) * radius;
 
         //{
 
         glm::mat4 view = glm::mat4(1.0f);
         glm::mat4 projection = glm::mat4(1.0f);
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -2.0f));
+        view = glm::lookAt(cPos, cPos + cFro, cUp);
         projection = glm::perspective(glm::radians(45.0f), (float)cfg.scrWidth / (float)cfg.scrHeight, 0.1f, 100.0f);
 
         glm::mat4 cube = glm::mat4(1.0f);
-        cube = glm::translate(cube, glm::vec3(0.0f, 0.0f, -3.0f));
+        cube = glm::translate(cube, glm::vec3(0.0f, 0.0f, 0.0f));
         cube = glm::rotate(cube, glm::radians((float)glfwGetTime()) * 150, glm::vec3(0.1f, 0.8f, -0.2f));
 
         glm::mat4 plane = glm::mat4(1.0f);
-        plane = glm::translate(plane, glm::vec3(0.0f, -1.0f, -3.0f));
+        plane = glm::translate(plane, glm::vec3(0.0f, -1.0f, 0.0f));
         plane = glm::rotate(plane, glm::radians(90.0f), glm::vec3(1, 0, 0));
-        plane = glm::rotate(plane, glm::radians((float)glfwGetTime())*80, glm::vec3(0, 0, 1));
 
         // use shader before matrix ops
         ourShader.use();
@@ -252,8 +269,50 @@ int main()
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow* window)
 {
+    float yaw;
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cPos += 0.01f * cFro;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cPos -= 0.01f * cFro;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cPos -= glm::normalize(glm::cross(cFro, cUp)) * 0.01f;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cPos += glm::normalize(glm::cross(cFro, cUp)) * 0.01f;
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+
+    float sensitivity = 0.1f;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
+
+    glm::vec3 direction;
+    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    direction.y = sin(glm::radians(pitch));
+    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cFro = glm::normalize(direction);
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
