@@ -23,6 +23,9 @@ glm::vec3 cameraPos = glm::vec3(0, 0, 3); // z is backwards, -z is forwards
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
+// this may look almost identical to the learnopengl.com code.. which it kinda is
+// but it'll change VERY soon
+
 int main()
 {
     // damnThatsCrazyIni: initialize and configure
