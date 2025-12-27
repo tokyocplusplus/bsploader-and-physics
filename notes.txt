@@ -1,0 +1,16 @@
+main goal:
+	source engine recreation
+
+sub goals:
+	initialize window 1
+	render triangle 1
+	handle input 1
+	create class for window and shader + system well.. not really but yeah: 1
+	CONFIG FILES!! CONFIG FILES!! CONFIG FILES!!!11!!1!1!11!!!! 1
+	render 3d geometry 1
+	create class for camera and 3d geometry 0.5
+	add texture support 0
+	load models and maps from .bsp files and hammer projects 0
+	optimize model loading 0
+	physics 0
+	add debug UI for engine 0

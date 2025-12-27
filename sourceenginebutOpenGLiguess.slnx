@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="sourceenginebutOpenGLiguess.vcxproj" Id="f2716c2a-e3ac-4b9b-b9ea-8e994703f5a1" />
+</Solution>
